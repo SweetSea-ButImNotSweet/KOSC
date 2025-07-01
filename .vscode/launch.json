@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "Debug love2d",
+            "type": "lua-local",
+            "request": "launch",
+            "program": {
+                "command": "lovec"
+            },
+            "args": [
+                "."
+            ],
+            "scriptRoots": [
+                "."
+            ]
+        }
+    ]
+}

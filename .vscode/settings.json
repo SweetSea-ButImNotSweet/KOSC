@@ -1,0 +1,15 @@
+{
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.runtime.special": {
+        "love.filesystem.load": "loadfile"
+    },
+    "Lua.workspace.library": [
+        "${3rd}/love2d/library",
+        "C:/Users/Harry/AppData/Roaming/Code/User/globalStorage/sumneko.lua/addonManager/addons/love2d/module/library",
+        "C:/Users/Harry/AppData/Roaming/Code/User/globalStorage/sumneko.lua/addonManager/addons/lldebugger/module/library"
+    ],
+    "Lua.workspace.checkThirdParty": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "main"
+    ]
+}
