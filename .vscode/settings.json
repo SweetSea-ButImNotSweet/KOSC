@@ -11,5 +11,7 @@
     "Lua.workspace.checkThirdParty": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "main"
+    ],
+    "Lua.diagnostics.disable": [
     ]
 }

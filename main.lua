@@ -5,14 +5,14 @@ end
 require "Zenitha"
 STRING.install()
 
-SCR.setSize(405, 720)
+SCR.setSize(900, 1600)
 
 WIDGET.setDefaultOption{
-    button={cornerR=0,type='button'}
+    button={type='button',cornerR=0},
 }
 
 for _, v in next,love.filesystem.getDirectoryItems("scenes/") do
     local name=v:sub(1,-5)
     SCN.add(name, require("scenes."..name))
 end
-ZENITHA.setFirstScene('calc')
+ZENITHA.setFirstScene('calcGUI')
