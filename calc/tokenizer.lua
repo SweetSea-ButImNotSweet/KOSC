@@ -1,6 +1,6 @@
 local insert = table.insert
 
-local NUMERAL_CHARS = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
+local NUMERAL_CHARS = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.' }
 
 ---@param exp string
 return function(exp)
