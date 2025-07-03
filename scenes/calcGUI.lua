@@ -24,8 +24,8 @@ local function pressKey(key)
     elseif key == 'DEL' then
         love.keypressed('backspace', 'backspace', false)
     elseif key == '=' then
-        local result = GoCalculate(displayScreen:getText())
-        if result then MSG("info", tostring(result)) end
+        local success, result = pcall(GoCalculate, displayScreen:getText())
+        MSG(success and "info" or "error", tostring(result or ""))
     elseif TABLE.find(singleCharKey, key) then
         love.textinput(key)
     end

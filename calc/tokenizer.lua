@@ -1,16 +1,25 @@
 local insert = table.insert
-
-local NUMERAL_CHARS = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.' }
+local find = string.find
 
 ---@param exp string
 return function(exp)
+    -- Temprorarily making it simple as first, before going to something more complex
     local output = {}
     local output_stack = ''
-    -- Temprorarily making it simple as first, before going to something more complex
-    local expStack = STRING.atomize(exp)
+    local is_output_stack_a_number = false
+    local expStack = STRING.atomize(exp:gsub('%s', ''))
 
     for _, v in next, expStack do
-        if TABLE.find(NUMERAL_CHARS, v) then
+        if find(v, '[0-9.]') then
+            output_stack = output_stack .. v
+            is_output_stack_a_number = true
+        elseif find(v, '[a-z]') then
+            if is_output_stack_a_number then
+                insert(output, '**') -- Hidden multiplying
+                insert(output, output_stack)
+                output_stack = ''
+                is_output_stack_a_number = false
+            end
             output_stack = output_stack .. v
         else
             if output_stack ~= '' then
