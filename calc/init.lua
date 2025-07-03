@@ -28,7 +28,7 @@ function GoCalculate(exp)
     local RPNlist = PRNgenerator(tokenizer(exp))
 
     for _, v in pairs(RPNlist) do
-        if calcFunctions[v] then
+        if calcFunctions[v] --[[operator/function]] then
             local argumentList = {}
             if (OPERATOR_ARGUMENT_REQUIREMENT[v] and #output >= OPERATOR_ARGUMENT_REQUIREMENT[v]) then
                 for _ = 1, OPERATOR_ARGUMENT_REQUIREMENT[v], 1 do
@@ -55,7 +55,7 @@ function GoCalculate(exp)
             insert(output, calcFunctions[v](unpack(TABLE.reverse(argumentList))))
         elseif tonumber(v) --[[number / argument amount (not affected)]] then
             insert(output, v)
-        else --[[operator/function]]
+        else
             error('SYNTAX ERROR! ' .. v ..' is not a right thing for us!')
         end
     end

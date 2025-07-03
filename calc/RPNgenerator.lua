@@ -14,6 +14,21 @@ local OPERATOR_PRIORITY = { -- This can be used as OPERATOR_LIST
     ['-'] = 1,
 }
 
+--- RPN (or Reverse Polish notation) is a mathematical notation in which operators
+--- follow their operands, in contrast to prefix or Polish notation (PN), in which
+--- operators precede their operands. The notation does not need any parentheses
+--- for as long as each operator has a fixed number of operands.
+--- (https://en.wikipedia.org/wiki/Reverse_Polish_notation)
+---
+--- This RPN generator is based on Shunting Yard algorithm but there are some
+--- changes, mostly to adapt some features that original RPN doesn't have
+--- (https://en.wikipedia.org/wiki/Shunting_yard_algorithm)
+---
+--- RPN format here should be the same with original RPN. But there are some factors
+--- you should know:
+--- 1. All numbers and functions are in string format before being actually processed
+--- 2. There is a item in `number` type, it is function's argument amount, this is
+--- only meant for tracking how many arguments we need to pop out from the stack
 
 return function(tokenList)
     -- Based on: https://en.wikipedia.org/wiki/Shunting_yard_algorithm
@@ -40,7 +55,8 @@ return function(tokenList)
             while #op_stack > 0 do
                 local popped = remove(op_stack)
                 if popped == '(' then
-                    -- Just make sure that we also insert the argument amount so function will know how many it needs
+                    -- Just make sure that we also insert the argument amount so
+                    -- we can pop out from the stack right number of items
                     if argumentCount_onlyForFunction >= 1 then
                         insert(op_stack, argumentCount_onlyForFunction)
                     end
