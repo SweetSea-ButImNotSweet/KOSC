@@ -55,11 +55,10 @@ return function(tokenList)
             argumentCount_onlyForFunction = argumentCount_onlyForFunction + 1
         elseif OPERATOR_PRIORITY[v] --[[operators]] then
             if #op_stack > 0 then
-                local last_thing_in_op_stack = op_stack[#op_stack]
                 while (
                         #op_stack > 0 and
-                        OPERATOR_PRIORITY[last_thing_in_op_stack] and
-                        OPERATOR_PRIORITY[last_thing_in_op_stack] >= OPERATOR_PRIORITY[v]
+                        OPERATOR_PRIORITY[op_stack[#op_stack]] and
+                        OPERATOR_PRIORITY[op_stack[#op_stack]] >= OPERATOR_PRIORITY[v]
                     ) do
                     insert(output, remove(op_stack))
                 end
