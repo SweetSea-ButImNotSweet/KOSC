@@ -34,5 +34,12 @@ return function(exp)
     end
 
     if output_stack ~= '' then insert(output, output_stack) end
+
+    -- Check for missing closed bracket
+    local opening_bracket = TABLE.count(output, "(")
+    local closing_bracket = TABLE.count(output, ")")
+    assert(opening_bracket >= closing_bracket, "SYNTAX ERROR: missing opening bracket!")
+    TABLE.append(output, STRING.rep(")", opening_bracket - closing_bracket):atomize())
+
     return output
 end

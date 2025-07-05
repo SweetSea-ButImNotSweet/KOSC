@@ -16,3 +16,5 @@ for _, v in next,love.filesystem.getDirectoryItems("scenes/") do
     SCN.add(name, require("scenes."..name))
 end
 ZENITHA.setFirstScene('calcGUI')
+
+require('calc.data_constant') -- Initialize all constants required

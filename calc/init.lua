@@ -3,23 +3,6 @@ local PRNgenerator = require "calc.RPNgenerator"
 local calcFunctions = require "calc.functions"
 local insert, remove = table.insert, table.remove
 
-local OPERATOR_ARGUMENT_REQUIREMENT = {
-    ['+'] = 2,
-    ['-'] = 2,
-    ['*'] = 2,
-    ['/'] = 2,
-    ['^'] = 2,
-    ['E'] = 2
-}
-local FUNCTION_ARGUMENT_MINIMAL_REQUIREMENT = {
-    ['sin'] = 1,
-    ['max'] = 2,
-}
-local FUNCTION_ARGUMENT_MAXIMUM_REQUIREMENT = {
-    ['sin'] = 1,
-    ['max'] = 1e99,
-}
-
 ---@return number|nil
 function GoCalculate(exp)
     if exp == '' then return end
@@ -30,16 +13,17 @@ function GoCalculate(exp)
     for _, v in pairs(RPNlist) do
         if calcFunctions[v] --[[operator/function]] then
             local argumentList = {}
-            if (OPERATOR_ARGUMENT_REQUIREMENT[v] and #output >= OPERATOR_ARGUMENT_REQUIREMENT[v]) then
-                for _ = 1, OPERATOR_ARGUMENT_REQUIREMENT[v], 1 do
+            local currentMathObj = MATH_PROPERTY[v]
+            if (currentMathObj.type == 'operator' and #output >= currentMathObj.args) then
+                for _ = 1, currentMathObj.args, 1 do
                     insert(argumentList, tonumber(remove(output)))
                 end
-            elseif FUNCTION_ARGUMENT_MAXIMUM_REQUIREMENT[v] then
+            elseif currentMathObj.type == 'function' then
                 local argumentAmount = remove(output)
                 assert(type(argumentAmount) == 'number', 'PARSER ERROR! Missing argument number for `'..v..'` function.')
                 if (
-                        argumentAmount >= FUNCTION_ARGUMENT_MINIMAL_REQUIREMENT[v] and
-                        argumentAmount <= FUNCTION_ARGUMENT_MAXIMUM_REQUIREMENT[v]
+                        argumentAmount >= currentMathObj.min_args and
+                        argumentAmount <= currentMathObj.max_args
                     ) then
                     for _ = 1, argumentAmount, 1 do
                         insert(argumentList, tonumber(remove(output)))

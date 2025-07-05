@@ -1,19 +1,5 @@
 local insert, remove = table.insert, table.remove
 
-local FUNCTION_PRIORITY = {
-    ['sin'] = 5,
-    ['max'] = 5,
-}
-local OPERATOR_PRIORITY = { -- This can be used as OPERATOR_LIST
-    ['E'] = 5,
-    ['**'] = 4,
-    ['^'] = 3,
-    ['*'] = 2,
-    ['/'] = 2,
-    ['+'] = 1,
-    ['-'] = 1,
-}
-
 --- RPN (or Reverse Polish notation) is a mathematical notation in which operators
 --- follow their operands, in contrast to prefix or Polish notation (PN), in which
 --- operators precede their operands. The notation does not need any parentheses
@@ -45,7 +31,7 @@ return function(tokenList)
             if (
                     argumentCount_onlyForFunction == 0 and
                     #op_stack > 0 and
-                    FUNCTION_PRIORITY[op_stack[#op_stack]]
+                    MATH_PROPERTY[op_stack[#op_stack]].type == 'function'
                 ) then
                 argumentCount_onlyForFunction = 1
             end
@@ -69,18 +55,19 @@ return function(tokenList)
         elseif v == ',' then
             assert(argumentCount_onlyForFunction >= 1, "SYNTAX ERROR: redudant ','")
             argumentCount_onlyForFunction = argumentCount_onlyForFunction + 1
-        elseif OPERATOR_PRIORITY[v] --[[operators]] then
+        elseif MATH_PROPERTY[v].type == 'operator' --[[operators]] then
+            local current_operator_priority = MATH_PROPERTY[v].priority
             if #op_stack > 0 then
                 while (
                         #op_stack > 0 and
-                        OPERATOR_PRIORITY[op_stack[#op_stack]] and
-                        OPERATOR_PRIORITY[op_stack[#op_stack]] >= OPERATOR_PRIORITY[v]
+                        MATH_PROPERTY[op_stack[#op_stack]].priority and
+                        MATH_PROPERTY[op_stack[#op_stack]].priority >= current_operator_priority
                     ) do
                     insert(output, remove(op_stack))
                 end
             end
             insert(op_stack, v)
-        elseif FUNCTION_PRIORITY[v] then -- function
+        elseif MATH_PROPERTY[v].type == 'function' then
             insert(op_stack, v)
         elseif tonumber(v) then          -- number
             insert(output, v)
