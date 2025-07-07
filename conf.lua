@@ -22,6 +22,27 @@ function love.conf(t)
 
     t.identity=identity -- Saving folder
     t.version="11.5"
+
+    -- Enable love's modules
+    -- Better to keep like this in order to keep Zenitha can work stably
+    t.modules={
+        system=true,event=true,window=true,
+        thread=true,math=true,data=true,
+
+        -- WARNING: Disable timer module will lead to delta time is 0 in love.update()
+        timer=true,
+
+        video=false,  audio=false,sound=false,
+        graphics=true,image=true ,font=true,
+
+        mouse   =true,
+        keyboard=true,
+        touch   =true,
+        joystick=false,
+
+        physics =false,
+    }
+
     t.gammacorrect=false
     t.appendidentity=true         -- Search files in source then in save directory
     t.accelerometerjoystick=false -- Accelerometer=joystick on ios/android
@@ -30,42 +51,31 @@ function love.conf(t)
         t.audio.mixwithsystem=true
     end
 
-    t.modules = {
-        window    = true,
-        system    = true,
-        event     = true,
-        thread    = true,
-        timer     = true,
-        math      = true,
-        data      = true,
-        video     = true,
-        audio     = false,
-        sound     = false,
-        graphics  = true,
-        font      = true,
-        image     = true,
-        mouse     = true,
-        touch     = true,
-        keyboard  = true,
-        joystick  = true,
-        physics   = false,
+    t.window={
+        title         ='KOSC',
+        icon          =nil,
+
+        display       =1,           -- Monitor ID
+        vsync         =0,           -- 0 = Unlimited FPS, otherwise limit to x FPS
+        msaa          =msaa,        -- Multi-sampled antialiasing
+        highdpi       =true,        -- High-dpi mode for the window on a Retina display
+
+        x             =nil,         -- Position of the window (set to nil so...
+        y             =nil,         -- ...love2d will align the window to the center of the screen)
+
+        width         =405,
+        height        =720,
+        minwidth      =405,
+        minheight     =720,
+
+        depth         =0,           -- Bits/samp of depth buffer
+        stencil       =1,           -- Bits/samp of stencil buffer
+
+        borderless    =MOBILE,
+        resizable     =not MOBILE,
+        fullscreentype=MOBILE and "exclusive" or "desktop", -- Fullscreen type
     }
 
-    local W=t.window
-    W.vsync=0              -- Unlimited FPS
-    W.msaa=msaa            -- Multi-sampled antialiasing
-    W.depth=0              -- Bits/samp of depth buffer
-    W.stencil=1            -- Bits/samp of stencil buffer
-    W.display=1            -- Monitor ID
-    W.highdpi=true         -- High-dpi mode for the window on a Retina display
-    W.x,W.y=nil,nil        -- Position of the window
-    W.borderless=MOBILE    -- Display window frame
-    W.resizable=not MOBILE -- Whether window is resizable
-
-    W.fullscreentype=MOBILE and "exclusive" or "desktop" -- Fullscreen type
-
-    W.width   ,W.height   =405,720
-    W.minwidth,W.minheight=405,720
 
     -- W.title="Techmino "..require"version".string -- Window title
     -- if system=='Linux' and fs.getInfo('media/image/icon.png') then
