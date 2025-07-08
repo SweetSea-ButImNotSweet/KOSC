@@ -55,7 +55,8 @@ return function(tokenList)
         elseif v == ',' then
             assert(argumentCount_onlyForFunction >= 1, "SYNTAX ERROR: redudant ','")
             argumentCount_onlyForFunction = argumentCount_onlyForFunction + 1
-        elseif MATH_PROPERTY[v].type == 'operator' --[[operators]] then
+        elseif MATH_PROPERTY[v] then
+            if MATH_PROPERTY[v].type == 'operator' then
             local current_operator_priority = MATH_PROPERTY[v].priority
             if #op_stack > 0 then
                 while (
@@ -67,8 +68,9 @@ return function(tokenList)
                 end
             end
             insert(op_stack, v)
-        elseif MATH_PROPERTY[v].type == 'function' then
-            insert(op_stack, v)
+            else--if MATH_PROPERTY[v].type == 'function' then
+                insert(op_stack, v)
+            end
         elseif tonumber(v) then          -- number
             insert(output, v)
         else                             -- wtf?!

@@ -77,4 +77,4 @@ function ZENITHA.globalEvent.keyDown(key,isRep)
     end
 end
 
-require('calc.data_constant') -- Initialize all constants required
+require('calc.data.math_property') -- Initialize all constants required

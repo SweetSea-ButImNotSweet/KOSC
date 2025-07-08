@@ -11,7 +11,16 @@ return function(exp)
 
     for _, v in next, expStack do
         if find(v, '[0-9.]') then
-            assert(output_stack_type ~= 'function', "SYNTAX ERROR: number can't go after a function")
+            assert(
+                not (
+                    output_stack_type == 'function' and MATH_PROPERTY[output_stack] and
+                    (
+                        MATH_PROPERTY[output_stack].type == 'operator' or
+                        MATH_PROPERTY[output_stack].type == 'constant'
+                    )
+                ),
+                "SYNTAX ERROR: number can't go after a function"
+            )
             output_stack = output_stack .. v
             output_stack_type = 'number'
         elseif find(v, '[a-z]') then

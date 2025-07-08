@@ -1,6 +1,6 @@
 local tokenizer = require "calc.tokenizer"
 local PRNgenerator = require "calc.RPNgenerator"
-local calcFunctions = require "calc.functions"
+local calcFunctions = require "calc.data.functions"
 local insert, remove = table.insert, table.remove
 
 ---@return number|nil
