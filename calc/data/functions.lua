@@ -38,4 +38,7 @@ return {
 
     ['int'] = function(x) return tonumber(tostring(x):gsub('.', '')) end,
     ['floor'] = function(x) return math.floor(x) end,
+
+    ['fraction'] = function(a, b, c) return c and a + b/c or a/b end,
+    ['remainder'] = function(d, c) return math.fmod(d, c) end
 }
