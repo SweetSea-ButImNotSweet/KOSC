@@ -1,16 +1,49 @@
 ---@type Zenitha.Scene
 local scene = {}
+local gc_getWidth, gc_print, gc_setFont = GC.getWidth, GC.print, GC.setFont
+
 ---@type Zenitha.Widget.inputBox
 ---@diagnostic disable-next-line: assign-type-mismatch
 local displayScreen = WIDGET.new { type = 'inputBox', x = 10, y = 30, w = 880, h = 250, fontSize = 45 }
 
-require 'calc'
+local displaying = ''
 
-local singleCharKey = {
-    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'E',
-    '+', '-', '*', '/', '^',
-    '(', ')',
-}
+require 'calc'
+local tokenizer_simple = require 'calc.tokenizer_simple'
+
+local legitmate_input_table = require 'calc.data.input'
+
+local shiftalphaStatus = 0 ---@type integer 0 is None, 1 is Shift, 2 is Alpha
+---@param status integer
+local function changeShiftAlphaStatus(status)
+    shiftalphaStatus = (shiftalphaStatus ~= status and status or 0)
+
+    -- Reset all style first
+    scene.widgetList.shift.type = 'button_fill'
+    scene.widgetList.shift.textColor = 'lightGray'
+    scene.widgetList.alpha.type = 'button_fill'
+    scene.widgetList.alpha.textColor = 'lightGray'
+
+    if shiftalphaStatus ~= 0 then
+    -- Okay time to change status
+    local keycalled = ({'shift', 'alpha'})[status]
+        scene.widgetList[keycalled].type = 'button_fill'
+        scene.widgetList[keycalled].textColor = ({'Yellow', 'Red'})[status]
+    end
+
+    scene.widgetList.shift:reset()
+    scene.widgetList.alpha:reset()
+end
+
+--- Add necessary spacing so the expression looks not so out of breath
+local function adding_stylizing_space_into_exp(tokenized_exp)
+    for i, v in next, tokenized_exp do
+        if MATH_PROPERTY[v] and MATH_PROPERTY[v].type == 'operator' then
+            tokenized_exp[i] = ' '..v..' ' -- not important
+        end
+    end
+end
+
 ---@param key string
 ---This function will receive all key presses from the calculator
 local function pressKey(key)
@@ -20,16 +53,33 @@ local function pressKey(key)
     WIDGET.sel = displayScreen
 
     if key == 'AC' then
-        displayScreen:setText('') -- Clear all
+        displaying = ''
     elseif key == 'DEL' then
-        love.keypressed('backspace', 'backspace', false)
+        local displaying_tokenized = tokenizer_simple(displaying)
+        if (
+            displaying_tokenized[#displaying_tokenized] == '(' and
+            displaying_tokenized[#displaying_tokenized - 1]:gmatch('^%a+$')
+        ) then
+            table.remove(displaying_tokenized)
+            table.remove(displaying_tokenized) -- Double to remove the function also
+
+            adding_stylizing_space_into_exp(displaying_tokenized)
+            displaying = table.concat(displaying_tokenized, '')
+        else
+            displaying = displaying:sub(1, #displaying - 1)
+        end
     elseif key == '=' then
-        local success, result = pcall(GoCalculate, displayScreen:getText())
+        local success, result = pcall(GoCalculate, displaying)
         MSG(success and "info" or "error", tostring(result or ""))
-    elseif TABLE.find(singleCharKey, key) then
-        love.textinput(key)
+    elseif legitmate_input_table[key] then
+        local displaying_tokenized = tokenizer_simple(displaying)
+        table.insert(displaying_tokenized, legitmate_input_table[key])
+
+        adding_stylizing_space_into_exp(displaying_tokenized)
+        displaying = table.concat(displaying_tokenized, '')
     end
 
+    changeShiftAlphaStatus(0)
     -- There is a little animation bug: if a widget is unfocus before it is released, then animation stuck
     WIDGET.sel = prevFocused
 end
@@ -39,7 +89,7 @@ scene.keyDown = function(key, isRep)
         pressKey('=')
     elseif isRep or WIDGET.sel == displayScreen then
         return
-    elseif key:sub(1, 2) and TABLE.find(singleCharKey, key:sub(3)) then
+    elseif key:sub(1, 2) and TABLE.find(legitmate_input_table, key:sub(3)) then
         pressKey(key:sub(3))
     end
 end
@@ -48,19 +98,23 @@ local function getPressKeyFunc(key)
     return function() pressKey(key) end
 end
 
-scene.widgetList = {
-    displayScreen,
+function scene.draw()
+    local currentFont = FONT.get(75)
+    gc_setFont(currentFont)
+    gc_print(displaying, 900 - currentFont:getWidth(displaying) - 10, 100)
+end
 
+scene.widgetList = {
     --[[
     Button layout details:
 
     Case 1 (6 buttons):
     | 10px | 139px | 10px | 138px | 10px | 138px | 10px | 138px | 10px | 138px | 10px | 139px | 10px |
-            ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑
+           ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑
 
     Case 2 (5 buttons):
     | 10px | 168px | 10px | 168px | 10px | 168px | 10px | 168px | 10px | 168px | 10px |
-            ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑
+           ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑      ↑       ↑
 
     Notes:
     - All buttons are horizontally aligned with consistent spacing.
@@ -71,9 +125,10 @@ scene.widgetList = {
     ]]
 
     --#region
+    shift = { type = 'button', x = 79.5,  y = 510, w = 139, h = 50, fontSize = 40, onPress = getPressKeyFunc(''), text = "SHIFT", color = 'Yellow', textColor = 'lightGray', onClick = function() changeShiftAlphaStatus(1) end,},
+    alpha = { type = 'button', x = 228.0, y = 510, w = 138, h = 50, fontSize = 40, onPress = getPressKeyFunc(''), text = "ALPHA", color = 'Red'   , textColor = 'lightGray', onClick = function() changeShiftAlphaStatus(2) end,},
+
     { type = 'text',        x = 672.0, y = 450,  alignX = 'center', alignY = 'center', fontSize = 30, color = 'Yellow',                 text = 'SETUP' },
-    { type = 'button_fill', x = 79.5,  y = 510,  w = 139,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "SHIFT",   fillColor = 'Yellow', textColor = 'Black', },
-    { type = 'button_fill', x = 228.0, y = 510,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "ALPHA",   fillColor = 'Red',    textColor = 'Black', },
     { type = 'button',      x = 672.0, y = 510,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "MODE" },
     { type = 'button',      x = 820.5, y = 510,  w = 139,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "?" },
     --#endregion
@@ -85,8 +140,8 @@ scene.widgetList = {
     { type = 'text',        x = 292,   y = 570,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Red',                    text = '=' },
     { type = 'text',        x = 608,   y = 570,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = 'DERI' }, -- DERI
     { type = 'text',        x = 736,   y = 570,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Red',                    text = ':' },
-    { type = 'text',        x = 756,   y = 570,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = 'Σ' }, -- x
-    { type = 'text',        x = 885,   y = 570,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Red',                    text = 'Π' },
+    -- { type = 'text',        x = 756,   y = 570,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = 'Σ' }, -- x
+    -- { type = 'text',        x = 885,   y = 570,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Red',                    text = 'Π' },
     { type = 'button',      x = 79.5,  y = 630,  w = 139,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "OPTN" },
     { type = 'button',      x = 228.0, y = 630,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "CALC" },
     { type = 'button',      x = 672.0, y = 630,  w = 138,           h = 50,            fontSize = 30, onPress = getPressKeyFunc(''),    text = "AntiDERI" },
@@ -127,7 +182,7 @@ scene.widgetList = {
     { type = 'button',      x = 79.5,  y = 870,  w = 139,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "(-)" },
     { type = 'button',      x = 228.0, y = 870,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "DEG" },
     { type = 'button',      x = 376.0, y = 870,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "x^(-1)" },
-    { type = 'button',      x = 524.0, y = 870,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "sin" },
+    { type = 'button',      x = 524.0, y = 870,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc('sin'), text = "sin" },
     { type = 'button',      x = 672.0, y = 870,  w = 138,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "cos" },
     { type = 'button',      x = 820.5, y = 870,  w = 139,           h = 50,            fontSize = 40, onPress = getPressKeyFunc(''),    text = "tan" },
 
@@ -135,7 +190,7 @@ scene.widgetList = {
     { type = 'text',        x = 440,   y = 930,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Sea',                    text = 'x' },
     { type = 'text',        x = 460,   y = 930,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = ',' }, -- sin
     { type = 'text',        x = 588,   y = 930,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Sea',                    text = 'y' },
-    { type = 'text',        x = 608,   y = 930,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = '' }, -- cos
+    -- { type = 'text',        x = 608,   y = 930,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = '' }, -- cos
     { type = 'text',        x = 736,   y = 930,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Sea',                    text = 'z' },
     { type = 'text',        x = 756,   y = 930,  alignX = 'left',   alignY = 'center', fontSize = 30, color = 'Yellow',                 text = 'M+' }, -- tan
     { type = 'text',        x = 885,   y = 930,  alignX = 'right',  alignY = 'center', fontSize = 30, color = 'Sea',                    text = 'M' },

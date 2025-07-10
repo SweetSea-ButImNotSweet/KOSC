@@ -71,6 +71,8 @@ return function(tokenList)
             else--if MATH_PROPERTY[v].type == 'function' then
                 insert(op_stack, v)
             end
+        elseif v:sub(1, 3) == 'var' then
+            insert(output, v)
         elseif tonumber(v) then          -- number
             insert(output, v)
         else                             -- wtf?!

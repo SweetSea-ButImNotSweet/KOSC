@@ -36,8 +36,9 @@ function GoCalculate(exp)
             end
             -- Need to reverse all arguments because they are in reversed order
             -- Btw this code will never reach if there is something wrong
-            insert(output, calcFunctions[v](unpack(TABLE.reverse(argumentList))))
-        elseif tonumber(v) --[[number / argument amount (not affected)]] then
+            TABLE.reverse(argumentList)
+            insert(output, calcFunctions[v](unpack(argumentList)))
+        elseif tonumber(v) or v:sub(1, 3) == 'var'--[[number / argument amount / variable]] then
             insert(output, v)
         else
             error('SYNTAX ERROR! ' .. v ..' is not a right thing for us!')
