@@ -34,6 +34,21 @@ return function(exp)
             end
             output_stack = output_stack .. v
             output_stack_type = 'function'
+        elseif v == '-' then
+            if output_stack ~= '' then
+                insert(output, output_stack)
+                output_stack = ''
+                output_stack_type = nil
+            end
+            if (
+                #output == 0 or
+                (
+                    MATH_PROPERTY[output[#output - 1]] and
+                    MATH_PROPERTY[output[#output - 1]].type == 'operator'
+                )
+            ) then
+                insert(output, 'neg')
+            end
         else
             if output_stack ~= '' then
                 insert(output, output_stack)
@@ -57,6 +72,7 @@ end
 
 --[[
 local sub, gmatch = string.sub, string.gmatch
+collectgarbage("stop")
 
 local function bench_sub()
     local str = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
@@ -64,7 +80,7 @@ local function bench_sub()
     for n = 1, 1e5 do
         for i = 1, #str do
             local c = sub(str, i, i)
-            total = total + (#c) -- chống tối ưu hoá
+            total = total + (#c) -- no optimization
         end
     end
     return total
@@ -75,7 +91,7 @@ local function bench_gmatch()
     local total = 0
     for n = 1, 1e5 do
         for c in gmatch(str, ".") do
-            total = total + (#c) -- chống tối ưu hoá
+            total = total + (#c) -- no optimization
         end
     end
     return total

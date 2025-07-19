@@ -57,25 +57,29 @@ return function(tokenList)
             argumentCount_onlyForFunction = argumentCount_onlyForFunction + 1
         elseif MATH_PROPERTY[v] then
             if MATH_PROPERTY[v].type == 'operator' then
-            local current_operator_priority = MATH_PROPERTY[v].priority
-            if #op_stack > 0 then
-                while (
-                        #op_stack > 0 and
-                        MATH_PROPERTY[op_stack[#op_stack]].priority and
-                        MATH_PROPERTY[op_stack[#op_stack]].priority >= current_operator_priority
-                    ) do
+                local current_operator_priority = MATH_PROPERTY[v].priority
+                while (#op_stack > 0) do
+                    local top_op = op_stack[#op_stack]
+                    local prop = MATH_PROPERTY[top_op]
+                    if not (
+                            prop and
+                            not prop.right_associative and
+                            prop.priority and
+                            prop.priority >= current_operator_priority
+                        ) then
+                        break
+                    end
                     insert(output, remove(op_stack))
                 end
-            end
-            insert(op_stack, v)
-            else--if MATH_PROPERTY[v].type == 'function' then
+                insert(op_stack, v)
+            else --if MATH_PROPERTY[v].type == 'function' then
                 insert(op_stack, v)
             end
         elseif v:sub(1, 3) == 'var' then
             insert(output, v)
-        elseif tonumber(v) then          -- number
+        elseif tonumber(v) then -- number
             insert(output, v)
-        else                             -- wtf?!
+        else                    -- wtf?!
             error("Looks like I forget the operator " .. v .. " or did you mistype something?")
         end
     end

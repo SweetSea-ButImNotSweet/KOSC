@@ -6,16 +6,22 @@ return {
     ['+'] = '+', ['-'] = '-', ['*'] = '*', ['/'] = '/', ['^'] = '^',
     ['.'] = '.', ['E'] = 'E', ['('] = '(', [')'] = ')',
 
-    sin    = "sin(",    cos    = "cos(",    tan =    "tan(",
-    arcsin = "arcsin(", arccos = "arccos(", arctan = "arctan(",
-    sinh   = "sinh(",   cosh   = "cosh(",   tanh =   "tanh(",
+    ['^2'] = '^2', ['^3'] = '^3',
+
+    varA = 'varA', varB = 'varB', varC = 'varC', varX = 'varX', varY = 'varY',
+    varD = 'varD', varE = 'varE', varF = 'varF', varZ = 'varZ', varM = 'varM',
+
+    sin    = "sin(",        cos    = "cos(",          tan =    "tan(",
+    arcsin = "arcsin(",     arccos = "arccos(",       arctan = "arctan(",
+    sinh   = "sinh(",       cosh   = "cosh(",         tanh =   "tanh(",
+    asin   = "asin(",       acos   = "acos(",         atan =   "atan(",
 
     min = "min(",           max = "max(",
     abs = "abs(",           fact = "fact(",
     sqrt = "sqrt(",         root = "root(",
     log = "log(",           ln = "ln(",
     int = "int(",           floor = "floor(",
-    fraction = "fraction(", remainder = "remainder(",
-    sigma = "sigma("
+    frac = "frac(",         mod = "mod(",
+    sigma = "sigma(",       Pi = 'Pi(',
 
 }

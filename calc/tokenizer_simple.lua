@@ -21,7 +21,6 @@ return function(exp)
         elseif find(v, '[a-z]') then
             if output_stack_type == 'number' then
                 insert(output, output_stack)
-                insert(output, '**') -- phép nhân ẩn
                 output_stack = ''
             end
             output_stack = output_stack .. v
