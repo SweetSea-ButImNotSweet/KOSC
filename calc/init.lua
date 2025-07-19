@@ -1,6 +1,5 @@
 local tokenizer = require "calc.tokenizer"
 local PRNgenerator = require "calc.RPNgenerator"
-local calcFunctions = require "calc.data.functions"
 local insert, remove = table.insert, table.remove
 
 ---@return number|nil
@@ -11,14 +10,16 @@ function GoCalculate(exp)
     local RPNlist = PRNgenerator(tokenizer(exp))
 
     for _, v in pairs(RPNlist) do
-        if calcFunctions[v] --[[operator/function]] then
+        if tonumber(v) or v:sub(1, 3) == 'var'--[[number / argument amount / variable]] then
+            insert(output, v)
+        elseif MATH_PROPERTY[v] --[[operator/function]] then
             local argumentList = {}
             local currentMathObj = MATH_PROPERTY[v]
-            if (currentMathObj.type == 'operator' and #output >= currentMathObj.args) then
+            if (currentMathObj.kind == 'operator' and #output >= currentMathObj.args) then
                 for _ = 1, currentMathObj.args, 1 do
                     insert(argumentList, tonumber(remove(output)))
                 end
-            elseif currentMathObj.type == 'function' then
+            elseif currentMathObj.kind == 'function' then
                 local argumentAmount = remove(output)
                 assert(type(argumentAmount) == 'number', 'PARSER ERROR! Missing argument number for `'..v..'` function.')
                 if (
@@ -37,9 +38,7 @@ function GoCalculate(exp)
             -- Need to reverse all arguments because they are in reversed order
             -- Btw this code will never reach if there is something wrong
             TABLE.reverse(argumentList)
-            insert(output, calcFunctions[v](unpack(argumentList)))
-        elseif tonumber(v) or v:sub(1, 3) == 'var'--[[number / argument amount / variable]] then
-            insert(output, v)
+            insert(output, MATH_PROPERTY[v].execute(unpack(argumentList)))
         else
             error('SYNTAX ERROR! ' .. v ..' is not a right thing for us!')
         end

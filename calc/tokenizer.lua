@@ -17,8 +17,8 @@ return function(exp)
                 not (
                     output_stack_type == 'function' and MATH_PROPERTY[output_stack] and
                     (
-                        MATH_PROPERTY[output_stack].type == 'operator' or
-                        MATH_PROPERTY[output_stack].type == 'constant'
+                        MATH_PROPERTY[output_stack].kind == 'operator' or
+                        MATH_PROPERTY[output_stack].kind == 'constant'
                     )
                 ),
                 "SYNTAX ERROR: number can't go after a function"
@@ -44,7 +44,7 @@ return function(exp)
                 #output == 0 or
                 (
                     MATH_PROPERTY[output[#output - 1]] and
-                    MATH_PROPERTY[output[#output - 1]].type == 'operator'
+                    MATH_PROPERTY[output[#output - 1]].kind == 'operator'
                 )
             ) then
                 insert(output, 'neg')

@@ -31,7 +31,7 @@ return function(tokenList)
             if (
                     argumentCount_onlyForFunction == 0 and
                     #op_stack > 0 and
-                    MATH_PROPERTY[op_stack[#op_stack]].type == 'function'
+                    MATH_PROPERTY[op_stack[#op_stack]].kind == 'function'
                 ) then
                 argumentCount_onlyForFunction = 1
             end
@@ -55,8 +55,12 @@ return function(tokenList)
         elseif v == ',' then
             assert(argumentCount_onlyForFunction >= 1, "SYNTAX ERROR: redudant ','")
             argumentCount_onlyForFunction = argumentCount_onlyForFunction + 1
+        elseif v:sub(1, 3) == 'var' then
+            insert(output, v)
+        elseif tonumber(v) then -- number
+            insert(output, v)
         elseif MATH_PROPERTY[v] then
-            if MATH_PROPERTY[v].type == 'operator' then
+            if MATH_PROPERTY[v].kind == 'operator' then
                 local current_operator_priority = MATH_PROPERTY[v].priority
                 while (#op_stack > 0) do
                     local top_op = op_stack[#op_stack]
@@ -75,10 +79,6 @@ return function(tokenList)
             else --if MATH_PROPERTY[v].type == 'function' then
                 insert(op_stack, v)
             end
-        elseif v:sub(1, 3) == 'var' then
-            insert(output, v)
-        elseif tonumber(v) then -- number
-            insert(output, v)
         else                    -- wtf?!
             error("Looks like I forget the operator " .. v .. " or did you mistype something?")
         end

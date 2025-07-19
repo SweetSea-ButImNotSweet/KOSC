@@ -41,23 +41,18 @@ end
 --- Add necessary spacing so the expression looks not so out of breath
 local function adding_stylizing_space_into_exp(tokenized_exp)
     for i, v in next, tokenized_exp do
-        if MATH_PROPERTY[v] and MATH_PROPERTY[v].type == 'operator' then
+        if MATH_PROPERTY[v] and MATH_PROPERTY[v].kind == 'operator' then
             tokenized_exp[i] = ' '..v..' ' -- not important
         end
     end
 end
 
-local legitmate_input_table = require 'calc.data.input'
-local keyboard_layout = require 'calc.data.keyboard_layout'
+
 local ignored_keys = {[''] = 1, shift = 1, alpha = 1}
 ---@param key string
 ---This function will receive all key presses from the calculator
 local function pressKey(key)
     if ignored_keys[key] then return end
-
-    if shiftalphaStatus ~= 0 and legitmate_input_table[key] then
-        key = keyboard_layout[key][shiftalphaStatus]
-    end
 
     local prevFocused = WIDGET.sel -- There is a little animation bug!
     WIDGET.sel = displayScreen
@@ -82,8 +77,13 @@ local function pressKey(key)
         local success, result = pcall(GoCalculate, displaying)
         MSG(success and "info" or "error", tostring(result or ""))
         if success then table.insert(exp_history, {displaying, result}) end
-    elseif legitmate_input_table[key] then
-        local displaying_tokenized = tokenizer_simple(displaying..legitmate_input_table[key])
+    elseif MATH_PROPERTY[key] then
+        local alt_keys_list = MATH_PROPERTY[key].alt_keys
+        if shiftalphaStatus ~= 0 and alt_keys_list then
+            key = alt_keys_list[shiftalphaStatus]
+        end
+
+        local displaying_tokenized = tokenizer_simple(displaying..MATH_PROPERTY[key].input)
         adding_stylizing_space_into_exp(displaying_tokenized)
         displaying = table.concat(displaying_tokenized, '')
     end
@@ -98,7 +98,7 @@ scene.keyDown = function(key, isRep)
         pressKey('=')
     elseif isRep or WIDGET.sel == displayScreen then
         return
-    elseif key:sub(1, 2) and TABLE.find(legitmate_input_table, key:sub(3)) then
+    elseif key:sub(1, 2) and MATH_PROPERTY[key:sub(3)] then
         pressKey(key:sub(3))
     end
 end
