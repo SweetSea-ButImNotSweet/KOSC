@@ -48,6 +48,8 @@ return function(exp)
                 )
             ) then
                 insert(output, 'neg')
+            else
+                insert(output, '-')
             end
         else
             if output_stack ~= '' then
