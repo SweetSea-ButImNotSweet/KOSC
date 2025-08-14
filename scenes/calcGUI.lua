@@ -6,6 +6,7 @@ local gc_print, gc_setFont, gc_setColor = GC.print, GC.setFont, GC.setColor
 ---@diagnostic disable-next-line: assign-type-mismatch
 local displayScreen = WIDGET.new { type = 'inputBox', x = 10, y = 30, w = 880, h = 250, fontSize = 45 }
 
+local displaying_original = ''
 local displaying = ''
 ---@type table<table<string>>
 local exp_history = {}
@@ -60,19 +61,19 @@ local function pressKey(key)
     if key == 'ac' then
         displaying = ''
     elseif key == 'del' then
-        local displaying_tokenized = tokenizer_simple(displaying)
+        local displaying_tokenized = tokenizer_simple(displaying_original)
+        table.remove(displaying_tokenized)
+
         if (
             displaying_tokenized[#displaying_tokenized] == '(' and
-            displaying_tokenized[#displaying_tokenized - 1]:gmatch('^%a+$')
+            MATH_PROPERTY[displaying_tokenized[#displaying_tokenized - 1]].kind == 'function'
         ) then
-            table.remove(displaying_tokenized)
             table.remove(displaying_tokenized) -- Double to remove the function also
-
-            adding_stylizing_space_into_exp(displaying_tokenized)
-            displaying = table.concat(displaying_tokenized, '')
-        else
-            displaying = displaying:sub(1, #displaying - 1)
         end
+
+        displaying_original = table.concat(displaying_tokenized, '')
+        adding_stylizing_space_into_exp(displaying_tokenized)
+        displaying = table.concat(displaying_tokenized, '')
     elseif key == '=' then
         local success, result = pcall(GoCalculate, displaying)
         MSG(success and "info" or "error", tostring(result or ""))
@@ -82,8 +83,9 @@ local function pressKey(key)
         if shiftalphaStatus ~= 0 and alt_keys_list then
             key = alt_keys_list[shiftalphaStatus]
         end
+        displaying_original = displaying_original..MATH_PROPERTY[key].input
 
-        local displaying_tokenized = tokenizer_simple(displaying..MATH_PROPERTY[key].input)
+        local displaying_tokenized = tokenizer_simple(displaying_original)
         adding_stylizing_space_into_exp(displaying_tokenized)
         displaying = table.concat(displaying_tokenized, '')
     end
